@@ -296,7 +296,7 @@ def prepare_rhel(extracted_raw_file_path, tmpdir, rhnUser, rhnPassword, osPasswo
     real_root = os.open("/", os.O_RDONLY)
     os.mkdir(mount_dir)  # Temporary mount directory
     print("Getting a free loop device ...")
-    cmd = 'losetup --nooverlap  --partscan  -f ' + extracted_raw_file_path
+    cmd = 'losetup  --partscan  -f ' + extracted_raw_file_path
     out, err, ret = exec_cmd(cmd)
     if ret != 0:
         print('ERROR: Failed to get a free loop device:', err)
