@@ -75,6 +75,7 @@ if [ "{{ distribution }}" == "rhel" ];then
     subscription-manager register --force --auto-attach --username={{ rh_sub_username }} --password={{ rh_sub_password }}
 fi
 yum update -y
+yum install epel-release -y
 yum install https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/cloud-init-19.1-10.ibm.el7.noarch.rpm -y
 ln -s /usr/lib/systemd/system/cloud-init-local.service /etc/systemd/system/multi-user.target.wants/cloud-init-local.service
 ln -s /usr/lib/systemd/system/cloud-init.service /etc/systemd/system/multi-user.target.wants/cloud-init.service
