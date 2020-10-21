@@ -75,7 +75,7 @@ if [ "{{ distribution }}" == "rhel" ];then
     subscription-manager register --force --auto-attach --username={{ rh_sub_username }} --password={{ rh_sub_password }}
 fi
 yum update -y
-yum install http://public.dhe.ibm.com/systems/virtualization/powervc/rhel8_cloud_init/cloud-init-19.1-8.ibm.el8.noarch.rpm -y
+yum install https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/cloud-init-19.1-10.ibm.el7.noarch.rpm -y
 ln -s /usr/lib/systemd/system/cloud-init-local.service /etc/systemd/system/multi-user.target.wants/cloud-init-local.service
 ln -s /usr/lib/systemd/system/cloud-init.service /etc/systemd/system/multi-user.target.wants/cloud-init.service
 ln -s /usr/lib/systemd/system/cloud-config.service /etc/systemd/system/multi-user.target.wants/cloud-config.service
@@ -495,12 +495,6 @@ def check_tmp_freespace(imageSize, tempDir):
 
 
 def check_host_prereqs():
-    # Check RHEL/CentOS 8 ppc64le
-
-    with open('/etc/os-release','r') as f:
-      if 'el8' not in f.read():
-        print("This program must be run on RHEL/CentOS 8.x system")
-        sys.exit(2)
 
     # Check machine architecture
     if platform.machine() != 'ppc64le':
