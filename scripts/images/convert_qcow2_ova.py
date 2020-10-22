@@ -76,7 +76,7 @@ if [ "{{ distribution }}" == "rhel" ];then
 fi
 yum update -y
 yum install epel-release -y
-yum install https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/deps/python-repoze-lru-0.7-2.ibm.el7.noarch.rpm https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/deps/python2-jsonschema-2.6.0-5.ibm.el7.noarch.rpm
+yum install -y https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/deps/python-repoze-lru-0.7-2.ibm.el7.noarch.rpm https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/deps/python2-jsonschema-2.6.0-5.ibm.el7.noarch.rpm
 yum install https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/cloud-init-19.1-10.ibm.el7.noarch.rpm -y
 ln -s /usr/lib/systemd/system/cloud-init-local.service /etc/systemd/system/multi-user.target.wants/cloud-init-local.service
 ln -s /usr/lib/systemd/system/cloud-init.service /etc/systemd/system/multi-user.target.wants/cloud-init.service
@@ -105,6 +105,10 @@ defaults {
     find_multipaths smart
 }
 EOF
+
+sed -i 's/#TCPKeepAlive yes/TCPKeepAlive yes/g' /etc/ssh/sshd_config
+echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
+echo "ClientAliveCountMax 10000" >> /etc/ssh/sshd_config
 
 sed -i 's/GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=60/g' /etc/default/grub
 sed -i 's/GRUB_CMDLINE_LINUX=.*$/GRUB_CMDLINE_LINUX="console=tty0 console=hvc0,115200n8  biosdevname=0  crashkernel=auto rd.shell rd.debug rd.driver.pre=dm_multipath log_buf_len=1M "/g' /etc/default/grub
