@@ -76,6 +76,7 @@ if [ "{{ distribution }}" == "rhel" ];then
 fi
 yum update -y
 yum install epel-release -y
+yum install https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/deps/python-repoze-lru-0.7-2.ibm.el7.noarch.rpm https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/deps/python2-jsonschema-2.6.0-5.ibm.el7.noarch.rpm
 yum install https://public.dhe.ibm.com/systems/virtualization/powervc/rhel7_cloud_init/cloud-init-19.1-10.ibm.el7.noarch.rpm -y
 ln -s /usr/lib/systemd/system/cloud-init-local.service /etc/systemd/system/multi-user.target.wants/cloud-init-local.service
 ln -s /usr/lib/systemd/system/cloud-init.service /etc/systemd/system/multi-user.target.wants/cloud-init.service
