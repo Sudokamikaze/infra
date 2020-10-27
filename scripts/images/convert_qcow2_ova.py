@@ -122,6 +122,7 @@ do
 	dracut --kver ${kernel} --force --add multipath --include /etc/multipath /etc/multipath --include /etc/multipath.conf /etc/multipath.conf
 done
 grub2-mkconfig -o /boot/grub2/grub.cfg
+rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0
 echo {{ root_password }} | passwd root --stdin
 if [ "{{ distribution }}" == "rhel" ];then
     subscription-manager unregister
