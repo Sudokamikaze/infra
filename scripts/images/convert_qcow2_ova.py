@@ -84,6 +84,7 @@ ln -s /usr/lib/systemd/system/cloud-init-local.service /etc/systemd/system/multi
 ln -s /usr/lib/systemd/system/cloud-init.service /etc/systemd/system/multi-user.target.wants/cloud-init.service
 ln -s /usr/lib/systemd/system/cloud-config.service /etc/systemd/system/multi-user.target.wants/cloud-config.service
 ln -s /usr/lib/systemd/system/cloud-final.service /etc/systemd/system/multi-user.target.wants/cloud-final.service
+ln -s /etc/systemd/system/mtu-fixer.service /etc/systemd/system/multi-user.target.wants/mtu-fixer.service
 
 rm -rf /etc/systemd/system/multi-user.target.wants/firewalld.service
 
@@ -233,6 +234,26 @@ system_info:
       templates_dir: /etc/cloud/templates/
    ssh_svcname: sshd"""
 
+template_mtu_fixer_systemd_service = """[Unit]
+Description=MTU Fixer
+Requires=cloud-final.service
+After=cloud-final.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+ExecStart=/usr/sbin/mtu-fixer
+
+[Install]
+WantedBy=multi-user.target"""
+
+template_mtu_fixer_script = """#!/bin/bash
+echo Setting the appropriate MTU, i.e disabling Jumbo Frames.
+sed -i 's/MTU=.*/MTU=1468/g' /etc/sysconfig/network-scripts/ifcfg-eth{0..1}
+echo Enabling proper MTU
+ifconfig eth0 mtu 1468
+ifconfig eth1 mtu 1468"""
 
 def exec_cmd(cmd):
     print("command:", cmd)
@@ -301,6 +322,8 @@ def prepare_rhel(extracted_raw_file_path, tmpdir, rhnUser, rhnPassword, osPasswo
     mount_dir = tmpdir + '/' + 'tempMount'
     rhel_bash_file = mount_dir + '/' + 'rhel_bash.sh'
     rhel_cloud_config_file = mount_dir + '/etc/cloud/' + 'cloud.cfg'
+    mtu_fixer_systemd_service_path = mount_dir + '/etc/systemd/system/' + 'mtu-fixer.service'
+    mtu_fixer_script_path = mount_dir + '/usr/sbin/' + 'mtu-fixer'
     real_root = os.open("/", os.O_RDONLY)
     os.mkdir(mount_dir)  # Temporary mount directory
     print("Getting a free loop device ...")
@@ -383,6 +406,18 @@ def prepare_rhel(extracted_raw_file_path, tmpdir, rhnUser, rhnPassword, osPasswo
         rhel_cloud_config = rhel_cloud_config_template.render()
         with open(rhel_cloud_config_file, "w") as stream:
             stream.write(rhel_cloud_config)
+
+        mtu_fixer_systemd_service_template = Template(template_mtu_fixer_systemd_service)
+        mtu_fixer_systemd_service = mtu_fixer_systemd_service_template.render()
+        with open(mtu_fixer_systemd_service_path, "w") as stream:
+            stream.write(mtu_fixer_systemd_service)
+
+        mtu_fixer_script_template = Template(template_mtu_fixer_script)
+        mtu_fixer_script = mtu_fixer_script_template.render()
+        with open(mtu_fixer_script_path, "w") as stream:
+            stream.write(mtu_fixer_script)
+        st = os.stat(mtu_fixer_script_path)
+        os.chmod(mtu_fixer_script_path, st.st_mode | stat.S_IEXEC)
 
         os.chroot(mount_dir)
         os.chdir('/')
